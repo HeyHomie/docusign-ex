@@ -32,7 +32,7 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
         "signers" =>
           envelope.signers
           |> Enum.with_index(1)
-          |> Enum.map(fn {signer, index} -> map_signer(signer, index) end)
+          |> Enum.map(fn {signer, index} -> map_signer(signer, index, envelope) end)
       },
       "eventNotification" => setup_webhook(envelope.webhook_url)
     }
@@ -59,11 +59,12 @@ defmodule DocusignEx.Mapper.EnvelopeMapper do
     }
   end
 
-  @spec map_signer(map, integer) :: map
-  defp map_signer(signer, order) do
+  @spec map_signer(map, integer, Envelope.t()) :: map
+  defp map_signer(signer, order, %Envelope{email_subject: email_subject}) do
     %{
       "email" => signer.email,
       "emailNotification" => %{
+        "emailSubject" => email_subject,
         "supportedLanguage" => Map.get(signer, :lang, @signer_default_lang)
       },
       "name" => signer.name,
